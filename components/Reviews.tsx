@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Star, Quote, Heart } from 'lucide-react';
-import { REVIEWS } from '../constants';
+import { REVIEWS, BRAND } from '../constants';
 
 const Reviews: React.FC = () => {
   return (
@@ -61,8 +61,8 @@ const Reviews: React.FC = () => {
           </div>
           <div className="shrink-0">
             <div className="text-sm font-bold uppercase tracking-widest text-blue-200 mb-2">Support Line</div>
-            <a href="tel:+971522451145" className="text-2xl font-black hover:text-orange-400 transition-colors">
-              +971 52 245 1145
+            <a href={`tel:${BRAND.phone}`} className="text-2xl font-black hover:text-orange-400 transition-colors">
+              {BRAND.phoneDisplay}
             </a>
           </div>
         </div>

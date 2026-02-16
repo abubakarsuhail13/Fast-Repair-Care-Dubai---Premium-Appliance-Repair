@@ -12,11 +12,11 @@ import { Service, Review, Area } from './types';
 
 export const BRAND = {
   name: "Fast Repair Care Dubai",
-  phone: "+971 52 245 1145",
-  phoneDisplay: "+971 52 245 1145",
-  whatsapp: "971522451145",
-  email: "info@fastrepaircare.ae",
-  address: "G7 Shop, G7 Building – Al Karama, Dubai, UAE",
+  phone: "+971 00 005 1100",
+  phoneDisplay: "+971 00 005 1100",
+  whatsapp: "971000051100",
+  email: "development@nexaforgetech.com",
+  address: "G0 Shop, G0 Building – Al Karama, Dubai, UAE",
   colors: {
     primary: "#0056b3",
     secondary: "#ff8c00",
@@ -128,12 +128,12 @@ export const TECHNICIANS = [
 export const BEFORE_AFTER = [
   {
     title: "AC Deep Cleaning",
-    before: "https://images.unsplash.com/photo-1585338048256-4c47b59ec7d2?auto=format&fit=crop&q=80&w=800",
+    before: "https://images.unsplash.com/photo-1581094288338-2314dddb7ecb?auto=format&fit=crop&q=80&w=800",
     after: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800"
   },
   {
     title: "Washing Machine Drum Fix",
-    before: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=800",
+    before: "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&q=80&w=800",
     after: "https://images.unsplash.com/photo-1626806819282-2c1dc01a5e0c?auto=format&fit=crop&q=80&w=800"
   }
 ];
