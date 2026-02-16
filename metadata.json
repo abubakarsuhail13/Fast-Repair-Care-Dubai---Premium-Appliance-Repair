@@ -1,0 +1,7 @@
+{
+  "name": "Fast Repair Care Dubai - Premium Appliance Repair",
+  "description": "A high-converting, premium service website for appliance repair in Dubai, featuring real-time AI diagnostic tools and conversion-optimized design.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
