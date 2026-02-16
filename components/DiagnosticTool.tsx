@@ -1,53 +1,55 @@
 
 import React, { useState } from 'react';
-import { GoogleGenAI, Type } from "@google/genai";
-import { Sparkles, Loader2, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Wrench, Search, Phone, MessageCircle, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { BRAND } from '../constants';
+
+const COMMON_ISSUES: Record<string, any> = {
+  "AC / Air Conditioning": {
+    cause: "Low refrigerant levels or clogged filter",
+    urgency: "High",
+    tip: "Turn off the unit immediately to prevent compressor burnout.",
+    time: "45-90 Mins"
+  },
+  "Washing Machine": {
+    cause: "Worn-out drum belt or pump blockage",
+    urgency: "Medium",
+    tip: "Unplug from power and check for trapped coins in the filter.",
+    time: "60 Mins"
+  },
+  "Refrigerator / Fridge": {
+    cause: "Dirty condenser coils or faulty thermostat",
+    urgency: "High",
+    tip: "Keep the doors closed to preserve temperature until help arrives.",
+    time: "60-120 Mins"
+  },
+  "Dishwasher": {
+    cause: "Spray arm blockage or inlet valve failure",
+    urgency: "Medium",
+    tip: "Check for debris in the drain basket.",
+    time: "45 Mins"
+  },
+  "Oven / Cooking Range": {
+    cause: "Igniter failure or thermostat calibration",
+    urgency: "High",
+    tip: "If you smell gas, turn off the main supply and open windows.",
+    time: "60 Mins"
+  }
+};
 
 const DiagnosticTool: React.FC = () => {
   const [appliance, setAppliance] = useState('');
-  const [problem, setProblem] = useState('');
   const [result, setResult] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const runDiagnostic = async () => {
-    if (!appliance || !problem) {
-      setError('Please provide both the appliance type and the problem description.');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: `Diagnostic request for ${appliance}. Issue described: ${problem}. Provide a probable cause, estimated urgency, and a tip for the user.`,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              probableCause: { type: Type.STRING },
-              urgency: { type: Type.STRING, description: 'Low, Medium, High' },
-              professionalFixNeeded: { type: Type.BOOLEAN },
-              diyTip: { type: Type.STRING },
-              estimatedRepairTime: { type: Type.STRING }
-            },
-            required: ['probableCause', 'urgency', 'professionalFixNeeded', 'diyTip', 'estimatedRepairTime']
-          }
-        }
+  const handleDiagnose = () => {
+    if (appliance && COMMON_ISSUES[appliance]) {
+      setResult(COMMON_ISSUES[appliance]);
+    } else if (appliance) {
+      setResult({
+        cause: "Complex electrical or mechanical fault",
+        urgency: "Medium",
+        tip: "Requires professional onsite inspection for safety.",
+        time: "60 Mins"
       });
-
-      const parsed = JSON.parse(response.text.trim());
-      setResult(parsed);
-    } catch (err) {
-      console.error('AI Error:', err);
-      setError('Failed to run diagnostic. Please describe the problem in our contact form below.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -55,132 +57,108 @@ const DiagnosticTool: React.FC = () => {
     <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-blue-100 max-w-4xl mx-auto">
       <div className="bg-blue-700 p-8 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 p-10 opacity-10">
-          <Sparkles className="w-32 h-32" />
+          <Wrench className="w-32 h-32" />
         </div>
         <div className="relative z-10">
           <h3 className="text-3xl font-bold mb-2 flex items-center">
-            <Sparkles className="w-8 h-8 mr-3 text-orange-400" />
-            AI Repair Diagnostic
+            <Search className="w-8 h-8 mr-3 text-orange-400" />
+            Instant Service Estimator
           </h3>
-          <p className="text-blue-100">Describe your appliance issue to get an instant AI-powered preliminary diagnostic.</p>
+          <p className="text-blue-100">Identify your appliance issue and get an immediate professional recommendation.</p>
         </div>
       </div>
       
       <div className="p-8">
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Appliance Type</label>
-            <select 
-              value={appliance}
-              onChange={(e) => setAppliance(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-            >
-              <option value="">Select Appliance</option>
-              <option value="AC / Air Conditioning">AC / Air Conditioning</option>
-              <option value="Washing Machine">Washing Machine</option>
-              <option value="Refrigerator / Fridge">Refrigerator / Fridge</option>
-              <option value="Dishwasher">Dishwasher</option>
-              <option value="Oven / Cooking Range">Oven / Cooking Range</option>
-              <option value="Dryer">Dryer</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Describe the Problem</label>
-            <input 
-              type="text"
-              placeholder="e.g., leaking water, making loud noise..."
-              value={problem}
-              onChange={(e) => setProblem(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-            />
-          </div>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center mb-6">
-            <AlertCircle className="w-5 h-5 mr-3" />
-            {error}
-          </div>
-        )}
-
         {!result ? (
-          <button 
-            onClick={runDiagnostic}
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-xl flex items-center justify-center transition-all disabled:opacity-50"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-6 h-6 mr-3 animate-spin" />
-                Analyzing Issue...
-              </>
-            ) : (
-              <>
-                <Send className="w-5 h-5 mr-3" />
-                Run Instant Diagnostic
-              </>
-            )}
-          </button>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Select Your Appliance</label>
+              <select 
+                value={appliance}
+                onChange={(e) => setAppliance(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-lg font-medium"
+              >
+                <option value="">Choose your appliance...</option>
+                {Object.keys(COMMON_ISSUES).map(key => (
+                  <option key={key} value={key}>{key}</option>
+                ))}
+                <option value="Other">Other Home Appliance</option>
+              </select>
+            </div>
+            
+            <button 
+              onClick={handleDiagnose}
+              disabled={!appliance}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 shadow-lg shadow-blue-200"
+            >
+              Get Expert Diagnosis & Quote
+            </button>
+          </div>
         ) : (
-          <div className="bg-blue-50 border border-blue-100 p-8 rounded-3xl animate-in zoom-in duration-300">
-            <div className="flex items-center justify-between mb-6">
-              <h4 className="text-xl font-bold text-blue-900">Diagnostic Results</h4>
-              <span className={`px-4 py-1 rounded-full text-xs font-bold uppercase ${
-                result.urgency === 'High' ? 'bg-red-500 text-white' : 
-                result.urgency === 'Medium' ? 'bg-orange-500 text-white' : 
-                'bg-green-500 text-white'
+          <div className="animate-in zoom-in duration-300">
+            <div className="flex items-center justify-between mb-8">
+              <h4 className="text-2xl font-bold text-slate-900">Diagnosis for {appliance}</h4>
+              <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${
+                result.urgency === 'High' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'
               }`}>
                 Urgency: {result.urgency}
               </span>
             </div>
             
-            <div className="space-y-6">
-              <div>
-                <div className="text-sm font-bold text-blue-800 uppercase mb-1">Probable Cause</div>
-                <p className="text-slate-800 font-medium">{result.probableCause}</p>
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                <div className="text-xs font-bold text-blue-600 uppercase mb-2">Probable Fault</div>
+                <div className="text-lg font-bold text-slate-800 leading-tight">{result.cause}</div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-blue-100">
-                  <div className="text-xs font-bold text-blue-500 uppercase mb-1">Repair Time</div>
-                  <div className="font-bold text-slate-900">{result.estimatedRepairTime}</div>
-                </div>
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-blue-100">
-                  <div className="text-xs font-bold text-blue-500 uppercase mb-1">Pro Needed?</div>
-                  <div className="font-bold text-slate-900">{result.professionalFixNeeded ? 'Yes, recommended' : 'Can be DIY'}</div>
-                </div>
-              </div>
-
-              <div className="bg-orange-50 border border-orange-100 p-4 rounded-2xl flex gap-4">
-                <CheckCircle2 className="w-6 h-6 text-orange-500 shrink-0" />
-                <div>
-                  <div className="text-sm font-bold text-orange-800 uppercase mb-1">Immediate Tip</div>
-                  <p className="text-slate-700 text-sm italic">{result.diyTip}</p>
-                </div>
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                <div className="text-xs font-bold text-blue-600 uppercase mb-2">Estimated Repair Time</div>
+                <div className="text-lg font-bold text-slate-800 leading-tight">{result.time}</div>
               </div>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-blue-200 flex flex-col md:flex-row gap-4">
+            <div className="bg-orange-50 border border-orange-100 p-6 rounded-2xl flex gap-4 mb-8">
+              <AlertTriangle className="w-8 h-8 text-orange-500 shrink-0" />
+              <div>
+                <div className="text-sm font-bold text-orange-800 uppercase mb-1">Safety Instruction</div>
+                <p className="text-slate-700 font-medium italic">{result.tip}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4">
               <a 
                 href={`tel:${BRAND.phone}`}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-xl text-center shadow-lg transition-all"
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black py-5 rounded-xl text-center shadow-xl transition-all flex items-center justify-center gap-3 text-lg"
               >
-                Call Expert for Fix
+                <Phone className="w-5 h-5" /> Call Technician Now
               </a>
-              <button 
-                onClick={() => {setResult(null); setProblem('');}}
-                className="flex-1 bg-white border border-blue-200 text-blue-800 font-bold py-4 rounded-xl hover:bg-blue-50 transition-all"
+              <a 
+                href={`https://wa.me/${BRAND.whatsapp}`}
+                className="flex-1 bg-green-500 hover:bg-green-600 text-white font-black py-5 rounded-xl text-center shadow-xl transition-all flex items-center justify-center gap-3 text-lg"
               >
-                Reset Diagnostic
-              </button>
+                <MessageCircle className="w-5 h-5" /> Book on WhatsApp
+              </a>
             </div>
+            
+            <button 
+              onClick={() => {setResult(null); setAppliance('');}}
+              className="w-full mt-4 text-slate-400 font-bold text-sm hover:text-blue-600 transition-colors"
+            >
+              Start New Diagnostic
+            </button>
           </div>
         )}
 
-        <p className="text-center text-xs text-slate-400 mt-6">
-          * AI diagnostics are preliminary suggestions. A physical inspection by our technicians is required for a 100% accurate repair quote.
-        </p>
+        <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-center gap-6 opacity-60">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
+            <CheckCircle2 className="w-4 h-4 text-green-500" /> Genuine Parts
+          </div>
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
+            <CheckCircle2 className="w-4 h-4 text-green-500" /> Fixed Prices
+          </div>
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase">
+            <CheckCircle2 className="w-4 h-4 text-green-500" /> Service Warranty
+          </div>
+        </div>
       </div>
     </div>
   );
